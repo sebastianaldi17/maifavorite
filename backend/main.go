@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/sebastianaldi17/maifavorite/backend-go/internal/entity/config"
 	favoritesHTTP "github.com/sebastianaldi17/maifavorite/backend-go/internal/handler/http/favorites"
 	songsHTTP "github.com/sebastianaldi17/maifavorite/backend-go/internal/handler/http/songs"
 	favoritesRes "github.com/sebastianaldi17/maifavorite/backend-go/internal/resource/favorites"
@@ -26,12 +29,24 @@ type handlers struct {
 }
 
 func main() {
-	connStr := "postgres://root:root@%s/docker-maifavorite-db?sslmode=disable"
-	if _, err := os.Stat("/.dockerenv"); err != nil {
-		connStr = fmt.Sprintf(connStr, "127.0.0.1")
-	} else {
-		connStr = fmt.Sprintf(connStr, "postgres")
+	path, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	configBytes, err := ioutil.ReadFile(path + "/db.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var c config.DBConfig
+	err = json.Unmarshal(configBytes, &c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", c.User, c.Password, c.Host, c.DBName)
+	log.Println(connStr)
 	db, err := sqlx.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)

@@ -1,0 +1,7 @@
+{
+    "comment": "Copy this file and rename to db.json, and then remove this field",
+    "user": "root",
+    "password": "root",
+    "host": "postgres",
+    "db_name": "docker-maifavorite-db"
+}

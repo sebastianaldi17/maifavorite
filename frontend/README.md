@@ -1,7 +1,24 @@
-# Vue 3 + Vite
+# Frontend (Vue)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A web app developed in Vue, bootstrapped using Vite, and uses Vuetify as the UI
+framework.
 
-## Recommended IDE Setup
+# Initial setup
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+1. Run `npm install`
+2. Make sure `backend` is running (either through docker or locally)
+3. Run `npm run dev`
+
+# Create production build
+
+Run `npm run build`. The static site should be on the `/dist` directory.
+
+# To-do list
+
+- Refactor `App.vue` (break down into smaller components)
+- Add Dockerfile and update `docker-compose.yml`
+- Parametrize port so that user can change the web port
+- Add internal level data
+- Add internal level filter
+- Add difficulty filter
+- Add type filter (STD/DX)

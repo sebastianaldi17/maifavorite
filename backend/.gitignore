@@ -21,3 +21,6 @@ vendor/
 go.work
 
 /tmp
+
+# DB config
+db.json
