@@ -1,7 +1,10 @@
-# Frontend (Vue)
+# Frontend (Vue) (no longer maintained)
 
 A web app developed in Vue, bootstrapped using Vite, and uses Vuetify as the UI
 framework.
+
+I am no longer updating the code for this, because I will focus on
+`supabase-frontend` instead.
 
 # Initial setup
 
@@ -13,7 +16,7 @@ framework.
 
 Run `npm run build`. The static site should be on the `/dist` directory.
 
-# To-do list
+# To-do list (for anyone interested)
 
 - Refactor `App.vue` (break down into smaller components)
 - Add Dockerfile and update `docker-compose.yml`

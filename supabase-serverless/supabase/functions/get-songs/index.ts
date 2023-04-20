@@ -19,7 +19,8 @@ type Row = {
   id: number,
   type: string,
   difficulty: string,
-  level: string
+  level: string,
+  internal_level: number,
 }
 
 type Song = {
@@ -35,7 +36,8 @@ type Chart = {
   id: number,
   type: string,
   difficulty: string,
-  level: string
+  level: string,
+  internal_level: number,
 }
 
 serve(async (req) => {
@@ -53,6 +55,7 @@ serve(async (req) => {
               charts.type,
               charts.difficulty,
               charts.level,
+              charts.internal_level,
               songs.title,
               songs.category,
               songs.artist,
@@ -84,7 +87,7 @@ serve(async (req) => {
             songsMap.set(chart.title, []);
         }
         const difflist = songsMap.get(chart.title)!;
-        difflist.push({id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level} as Chart);
+        difflist.push({id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level, internal_level: chart.internal_level} as Chart);
         songsMap.set(chart.title, difflist);
       })
 
