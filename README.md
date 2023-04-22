@@ -7,21 +7,18 @@ The chart data is fetched using a node script (see the `populate-db` directory
 for details). The charts you mark as favorites are stored on the same database,
 on a separate table.
 
-I'm currently working on a version that saves the favorite data on
-`localStorage` instead of a database, so that a static site can fetch the chart
-data & mark which ones are favorites.
-
 # Directory explanation
 
 - backend: Golang REST API that serves chart data & favorite data
 - dbscripts: Contains SQL scripts that creates the tables required to store
   chart data
-- frontend: Vue web app that displays chart & favorite data
+- frontend: Vue web app that displays chart & favorite data. Needs `backend` to
+  be running. No longer maintained in favor of `supabase-frontend`
 - populate-db: Node script that fetches chart data and stores it to a postgres
   database
 - supabase-serverless: Supabase edge function that serves ONLY chart data.
-  Currently creating a version of frontend that accepts the chart data and
-  process favorite data internally using `localStorage`
+- supabase-frontend: A frontend version that uses the Supabase edge function on
+  `supabase-serverless`, and stores favorites using `localStorage`.
 
 # Initial setup
 
@@ -39,14 +36,6 @@ what to do.
      `await UpdateInternallevel` (as of writing, comment out lines 30 to 35)
 3. Go to `frontend` and run `npm run dev`.
 
-I am working on creating a Dockerfile and a docker compose entry for the
-frontend, so maybe step 3 can be skipped later in the future.
-
 ## Serving on Supabase
 
 Folow all the initial setup steps on `supabase-serverless`.
-
-The frontend that utilizes Supabase is still a work in progress, and running the
-current `frontend` directory will lead to problems because it points directly to
-localhost, and the Supabase version does not support POST request for marking as
-favorite.
