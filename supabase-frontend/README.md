@@ -14,6 +14,10 @@ Run `npm run build`. The static site should be on the `/dist` directory.
 
 # To-do list
 
-- Refactor `App.vue` (break down into smaller components)
-- Parametrize port so that user can change the web port
-- Add difficulty filter
+- Modify category & version filter so that multiple entries can be selected
+  (like difficulty filter)
+- Add title kana filter, because it is a hassle to type in hiragana just to
+  search
+- Add autocomplete suggestion for title & artist (and title kana when it is
+  done)
+- Add collection/playlist system, instead of just marking as favorite

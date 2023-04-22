@@ -98,11 +98,15 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
             let chartDiff = diffMapping.get(sheet.getCell(i, dataIndexes[2] + offset).value);
             let chartInternal = sheet.getCell(i, dataIndexes[3] + offset).value;
             if (isNaN(chartInternal) || chartDiff === null || chartType === null || title === null) continue;
-            console.log(`${title} | ${chartType} | ${chartDiff} | ${chartInternal}`);
+            // console.log(`${title} | ${chartType} | ${chartDiff} | ${chartInternal}`);
 
             await client.query(queryUpdateInternalLevel, [chartInternal, title, chartType, chartDiff])
-                .then(() => {
-                    console.log(`${title} ${chartType} ${chartDiff} updated to ${chartInternal}`);
+                .then((res) => {
+                    if(res.rowCount <= 0) {
+                        console.log(`${title} ${chartType} ${chartDiff} is not updated (not present in DB)`)
+                    } else {
+                        console.log(`${title} ${chartType} ${chartDiff} updated to ${chartInternal}`);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);

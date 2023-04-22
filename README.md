@@ -16,12 +16,13 @@ data & mark which ones are favorites.
 - backend: Golang REST API that serves chart data & favorite data
 - dbscripts: Contains SQL scripts that creates the tables required to store
   chart data
-- frontend: Vue web app that displays chart & favorite data
+- frontend: Vue web app that displays chart & favorite data. Needs `backend` to
+  be running. No longer maintained in favor of `supabase-frontend`
 - populate-db: Node script that fetches chart data and stores it to a postgres
   database
 - supabase-serverless: Supabase edge function that serves ONLY chart data.
-  Currently creating a version of frontend that accepts the chart data and
-  process favorite data internally using `localStorage`
+- supabase-frontend: A frontend version that uses the Supabase edge function on
+  `supabase-serverless`, and stores favorites using `localStorage`.
 
 # Initial setup
 
