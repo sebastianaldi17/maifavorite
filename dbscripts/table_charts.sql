@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS charts (
     last_update TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (title_kana, type, difficulty)
 )
+
+CREATE INDEX IF NOT EXISTS charts_title_kana_type_difficulty_idx
+ON charts (title_kana, type, difficulty, id);

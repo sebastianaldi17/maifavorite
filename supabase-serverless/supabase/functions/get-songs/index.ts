@@ -12,6 +12,7 @@ const corsHeaders = {
 
 type Row = {
   title: string,
+  title_kana: string,
   category: string,
   artist: string,
   version: string,
@@ -25,6 +26,7 @@ type Row = {
 
 type Song = {
   title: string,
+  title_kana: string,
   category: string,
   artist: string,
   version: string,
@@ -57,6 +59,7 @@ serve(async (req) => {
               charts.level,
               charts.internal_level,
               songs.title,
+              songs.title_kana,
               songs.category,
               songs.artist,
               songs.imageurl,
@@ -78,6 +81,7 @@ serve(async (req) => {
       charts.forEach(chart => {
         songsData.set(chart.title, {
           title: chart.title,
+          title_kana: chart.title_kana,
           category: chart.category,
           artist: chart.artist,
           version: chart.version,
@@ -95,6 +99,7 @@ serve(async (req) => {
         songsData.forEach((data, title) => {
             resObj.push({
                 title: data.title,
+                title_kana: data.title_kana,
                 category: data.category,
                 artist: data.artist,
                 version: data.version,

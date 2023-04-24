@@ -20,6 +20,10 @@ to serve maimai chart data.
 You might need to install deno and enable deno language support for linting
 purposes.
 
+If there are any updates to the edge function, run
+`supabase functions deploy get-songs --no-verify-jwt` to update the cloud
+function to the latest version.
+
 # References:
 
 - https://supabase.com/docs/guides/functions/quickstart
