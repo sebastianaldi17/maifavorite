@@ -2,7 +2,7 @@
     <v-card @click="passChartData(chartData)" variant="tonal">
         <v-img :src="chartData.image" height="150" cover>
             <v-chip class="ma-1" color="blue-lighten-1" variant="elevated">
-                {{ chartData.internal_level }}
+                {{ internalLevel }}
             </v-chip>
             <v-chip class="ma-1" color="black" variant="elevated">
                 {{ chartData.type }}
@@ -23,6 +23,7 @@ export default {
         return {
             difficultyColor: "black",
             difficultyText: "",
+            internalLevel: "",
         }
     },
 
@@ -36,6 +37,11 @@ export default {
     },
 
     mounted() {
+        this.internalLevel = this.chartData.internal_level
+        if (!isNaN(this.chartData.internal_level)) {
+            let floatInternal = parseFloat(this.chartData.internal_level)
+            this.internalLevel = floatInternal.toFixed(1)
+        }
         switch (this.chartData.difficulty) {
             case 'BASIC':
                 this.difficultyColor = "green-lighten-1"

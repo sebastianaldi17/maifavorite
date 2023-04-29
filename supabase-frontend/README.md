@@ -14,7 +14,8 @@ Run `npm run build`. The static site should be on the `/dist` directory.
 
 # To-do list
 
-- Add import/export favorites (or collection system if already implemented)
+- Add import/export & clear favorites (or collection system if already
+  implemented)
 - Add custom sort (ID, title, internal level)
 - Add autocomplete suggestion for title & artist (and title kana when it is
   done)
