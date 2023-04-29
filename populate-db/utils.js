@@ -34,11 +34,41 @@ const diffMapping = new Map(
     ]
 )
 
+const titleHotfix = new Map(
+    [
+        ['Excalibur ～Revived Resolution～', `Excalibur ～Revived resolution～`],
+        ['“411Ψ892”', `"411Ψ892"`],
+        ['System "Z"', `System “Z”`],
+        ['Love’s Theme of BADASS ～バッド・アス 愛のテーマ～', `Love's Theme of BADASS ～バッド・アス 愛のテーマ～`],
+        ['FREEDOM DiVE(tpz Overcute Remix)', `FREEDOM DiVE (tpz Overcute Remix)`],
+        ['Got more raves?', `Got more raves？`],
+        ['管弦楽組曲 第3番 ニ長調「第2曲(G線上のアリア)」BWV.1068-2', `管弦楽組曲 第3番 ニ長調「第2曲（G線上のアリア）」BWV.1068-2`],
+        ['D✪N’T ST✪P R✪CKIN’', `D✪N’T  ST✪P  R✪CKIN’`],
+        ['Seclet Sleuth', `Secret Sleuth`],
+        ['REVIVER オルタンシア･サーガ-蒼の騎士団- オリジナルVer.', `REVIVER オルタンシア・サーガ -蒼の騎士団- オリジナルVer.`],
+        ['Party 4U "holy nite mix"', `Party 4U ”holy nite mix”`],
+        ['L\'epilogue', `L'épilogue`],
+        ['スカーレット警察のゲットーパトロール２４時', `スカーレット警察のゲットーパトロール24時`],
+        ['チルノのパーフェクトさんすう教室 ⑨周年バージョン', `チルノのパーフェクトさんすう教室　⑨周年バージョン`],
+        ['【東方ニコカラ】秘神マターラfeat.魂音泉【IOSYS】', `【東方ニコカラ】秘神マターラ feat.魂音泉【IOSYS】`],
+        ['Change Our MIRAI!', `Change Our MIRAI！`],
+        ['Save This World νMix', `Save This World νMIX`],
+        ['砂の惑星 feat.HATSUNE MIKU', `砂の惑星 feat. HATSUNE MIKU`],
+        ['レッツゴー！陰陽師', `レッツゴー!陰陽師`],
+        ['曖昧Mind', `曖昧mind`],
+        ['ガチャガチャきゅ～と・ふぃぎゅ＠メイト', `ガチャガチャきゅ～と・ふぃぎゅ@メイト`],
+        ['ファンタジーゾーンOPA!-OPA! -GMT remix-', `ファンタジーゾーン OPA-OPA! -GMT remix-`],
+        ['ぼくたちいつでもしゅわっしゅわ！', `ぼくたちいつでも　しゅわっしゅわ！`],
+        ['Boys O\'Clock', `Boys O’Clock`],
+        ['God Knows…', `God knows...`],
+    ]
+)
+
 module.exports.InsertSong = async function (client, song) {
     const versionKey = Number(song.version.substring(0, 3));
     const version = versionMapping.get(versionKey);
     await client.query(
-        queryInsertSong, [song.title_kana, song.title, song.catcode, song.artist, `https://maimaidx.jp/maimai-mobile/img/Music/${song.image_url}`, version]
+        queryInsertSong, [song.title_kana, song.title.trim(), song.catcode, song.artist, `https://maimaidx.jp/maimai-mobile/img/Music/${song.image_url}`, version]
     ).then(() => {
         console.log(`${song.title} added to song table`);
     }).catch((error) => {
@@ -100,10 +130,14 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
             if (isNaN(chartInternal) || chartDiff === null || chartType === null || title === null) continue;
             // console.log(`${title} | ${chartType} | ${chartDiff} | ${chartInternal}`);
 
+            if(titleHotfix.has(title)) {
+                title = titleHotfix.get(title)
+            }
+
             await client.query(queryUpdateInternalLevel, [chartInternal, title, chartType, chartDiff])
                 .then((res) => {
                     if(res.rowCount <= 0) {
-                        console.log(`${title} ${chartType} ${chartDiff} is not updated (not present in DB)`)
+                        console.log(`<${title}> ${chartType} ${chartDiff} is not updated (not present in DB), check the title`)
                     } else {
                         console.log(`${title} ${chartType} ${chartDiff} updated to ${chartInternal}`);
                     }
