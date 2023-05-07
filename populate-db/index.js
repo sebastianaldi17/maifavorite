@@ -35,6 +35,7 @@ async function main() {
     await UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 14, 21]);
     await UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 7, 14, 21]);
     await UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35, 42, 49]);
+    await UpdateInternalLevel(client, spreadsheet, '12+', [0, 1, 2, 4], [0, 7, 13, 19, 25, 31]);
     process.exit();
 }
 

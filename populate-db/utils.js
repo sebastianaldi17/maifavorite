@@ -127,7 +127,13 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
             let chartType = sheet.getCell(i, dataIndexes[1] + offset).value;
             let chartDiff = diffMapping.get(sheet.getCell(i, dataIndexes[2] + offset).value);
             let chartInternal = sheet.getCell(i, dataIndexes[3] + offset).value;
-            if (isNaN(chartInternal) || chartDiff === null || chartType === null || title === null) continue;
+            if(chartInternal === "-") {
+                // Assume that old value is to the left of "new" value
+                // Can be improved by adding a fallback index on dataIndexes
+                console.log(`${title} new internal level is NaN, using old internal level`);
+                chartInternal = sheet.getCell(i, dataIndexes[3] + offset - 1).value;
+            }
+            if (isNaN(chartInternal) || chartInternal === null || chartDiff === null || chartType === null || title === null) continue;
             // console.log(`${title} | ${chartType} | ${chartDiff} | ${chartInternal}`);
 
             if(titleHotfix.has(title)) {
