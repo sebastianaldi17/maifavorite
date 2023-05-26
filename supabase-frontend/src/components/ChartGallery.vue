@@ -14,8 +14,9 @@
                 </v-btn>
             </template>
         </v-snackbar>
-        <v-btn color="teal-lighten-2" class="mb-4" @click="() => { toggleFilters = !toggleFilters }">Show/hide
+        <v-btn color="teal-lighten-2" class="mb-4 mr-2" @click="() => { toggleFilters = !toggleFilters }">Toggle
             filters</v-btn>
+        <v-btn color="red-accent-4" class="mb-4 mr-2" @click="clearCache">Clear cache</v-btn>
         <v-row v-if="toggleFilters">
             <v-col>
                 <v-text-field label="Title search" v-model="titleFilter" />
@@ -36,7 +37,8 @@
                 <v-select label="Cateogry select" :items="categories" v-model="categoriesFilter" chips multiple clearable />
                 <v-select label="Difficulty select" :items="difficulties" v-model="difficultiesFilter" chips multiple
                     clearable />
-                <v-btn color="blue-lighten-1" @click="getRandomChart">Randomize</v-btn>
+                <v-btn color="blue-lighten-1" @click="getRandomChart" class="mr-2">Randomize</v-btn>
+                <v-btn color="red-lighten-1" @click="deleteFavorites" class="ma-2">Clear Favorites</v-btn>
                 <v-col cols="6">
                     <v-switch v-model="toggleFavorite" label="Favorites only?" color="red"></v-switch>
                 </v-col>
@@ -136,10 +138,24 @@ export default {
             this.showModal = false
         },
 
+        clearCache() {
+            if(confirm("Are you sure you want to clear cached chart data?"))  {
+                localStorage.removeItem("cache")
+                window.location.reload()
+            }
+        },
+
         deleteFavorite(chartID) {
             this.favorites = this.favorites.filter((id) => { return id !== chartID })
             localStorage.setItem("favorites", JSON.stringify(this.favorites))
             this.showModal = false
+        },
+
+        deleteFavorites() {
+            if (confirm("Are you sure you want to remove all favorites?")) {
+                window.location.reload()
+                localStorage.setItem("favorites", JSON.stringify([]))
+            }
         },
 
         getFilteredCharts() {
@@ -210,6 +226,38 @@ export default {
             this.modalData = randomChart
             this.showModal = true
         },
+
+        unpackData(data) {
+            let versionSet = new Set()
+            let categorySet = new Set()
+            let fetchedCharts = []
+            for (let i = 0; i < data.length; i += 1) {
+                let song = data[i]
+                versionSet.add(song.version)
+                categorySet.add(song.category)
+                for (let j = 0; j < song.diff.length; j += 1) {
+                    let chart = song.diff[j]
+                    fetchedCharts.push({
+                        artist: song.artist,
+                        category: song.category,
+                        image: song.image_url,
+                        title: song.title,
+                        title_romaji: toRomaji(song.title_kana),
+                        version: song.version,
+                        difficulty: chart.difficulty,
+                        id: chart.id,
+                        level: chart.level,
+                        internal_level: chart.internal_level,
+                        type: chart.type,
+                    })
+                }
+            }
+            this.charts = fetchedCharts
+            this.categories = [...categorySet]
+            this.versions = [...versionSet]
+            this.charts.reverse()
+            this.loading = false
+        }
     },
 
     mounted() {
@@ -217,48 +265,29 @@ export default {
         if (localFav === null) {
             localFav = []
         }
-
         this.favorites = localFav
 
-        let versionSet = new Set()
-        let categorySet = new Set()
-        axios
-            .get('https://lmqidayjwoayyhhejbtz.functions.supabase.co/get-songs')
-            .then((resp) => {
-                let fetchedCharts = []
-                for (let i = 0; i < resp.data.length; i += 1) {
-                    let song = resp.data[i]
-                    versionSet.add(song.version)
-                    categorySet.add(song.category)
-                    for (let j = 0; j < song.diff.length; j += 1) {
-                        let chart = song.diff[j]
-                        fetchedCharts.push({
-                            artist: song.artist,
-                            category: song.category,
-                            image: song.image_url,
-                            title: song.title,
-                            title_romaji: toRomaji(song.title_kana),
-                            version: song.version,
-                            difficulty: chart.difficulty,
-                            id: chart.id,
-                            level: chart.level,
-                            internal_level: chart.internal_level,
-                            type: chart.type,
-                        })
-                    }
-                }
-                this.charts = fetchedCharts
-                this.categories = [...categorySet]
-                this.versions = [...versionSet]
-                this.charts.reverse()
-                this.loading = false
-            })
-            .catch((err) => {
-                console.error(err.message)
-                this.snackbar = true
-                this.snackbarText = err.message
-                this.loading = false
-            })
+        let cache = localStorage.getItem("cache")
+        if (cache === null) {
+            axios
+                .get('https://lmqidayjwoayyhhejbtz.functions.supabase.co/get-songs')
+                .then((resp) => {
+                    localStorage.setItem("cache", JSON.stringify(resp.data))
+                    this.unpackData(resp.data)
+                })
+                .catch((err) => {
+                    console.error(err)
+                    this.snackbar = true
+                    this.snackbarText = err.message
+                    this.loading = false
+                })
+        } else {
+            cache = JSON.parse(cache)
+            this.unpackData(cache)
+            this.snackbarText = "Loaded data from cache"
+            this.snackbar = true
+        }
+
     },
 }
 </script>

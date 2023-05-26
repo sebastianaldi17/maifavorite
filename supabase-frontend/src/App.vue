@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-app-bar app color="purple-lighten-1">
-      <v-toolbar-title>MaiFavorite v0.0.5 </v-toolbar-title>
+      <v-toolbar-title>MaiFavorite v0.0.6 </v-toolbar-title>
     </v-app-bar>
 
     <v-main>
