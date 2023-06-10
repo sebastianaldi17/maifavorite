@@ -1,0 +1,18 @@
+{
+  "name": "scrape-scores",
+  "version": "1.0.0",
+  "description": "scrape scores from maimainet",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scrape": "node index.js > logs.txt"
+  },
+  "author": "Sebastian Aldi",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.1.4",
+    "puppeteer": "^20.5.0"
+  }
+}

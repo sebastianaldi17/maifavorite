@@ -28,6 +28,9 @@
             <v-card-text>
                 Version: {{ chartData.version }}
             </v-card-text>
+            <v-card-text>
+                Your best: {{ chartData.score }}
+            </v-card-text>
             <v-divider></v-divider>
             <v-text-field label="Accuracy" v-model="accuracy" type="number" min="0" max="101" step="any" />
             <v-card-text>

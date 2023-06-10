@@ -6,10 +6,18 @@
                 </v-progress-circular>
             </v-layout>
         </v-dialog>
-        <v-snackbar v-model="snackbar">
-            {{ snackbarText }}
+        <v-snackbar v-model="snackbarWarn" key="sbwarn" top=100>
+            {{ snackbarWarnText }}
             <template v-slot:actions>
-                <v-btn color="pink" variant="text" @click="snackbar = false">
+                <v-btn color="pink" variant="text" @click="snackbarWarn = false">
+                    Close
+                </v-btn>
+            </template>
+        </v-snackbar>
+        <v-snackbar v-model="snackbarError" key="sberr">
+            {{ snackbarErrorText }}
+            <template v-slot:actions>
+                <v-btn color="pink" variant="text" @click="snackbarError = false">
                     Close
                 </v-btn>
             </template>
@@ -17,6 +25,8 @@
         <v-btn color="teal-lighten-2" class="mb-4 mr-2" @click="() => { toggleFilters = !toggleFilters }">Toggle
             filters</v-btn>
         <v-btn color="red-accent-4" class="mb-4 mr-2" @click="clearCache">Clear cache</v-btn>
+        <v-btn color="deep-purple-darken-3" class="mb-4 mr-2" @click="() => { showScoreImport = true }">Import score</v-btn>
+        <v-btn color="pink-accent-2" class="mb-4 mr-2" @click="deleteScores">Clear scores</v-btn>
         <v-row v-if="toggleFilters">
             <v-col>
                 <v-text-field label="Title search" v-model="titleFilter" />
@@ -54,6 +64,8 @@
                 @trigger-open="(triggerOpen) => { showModal = triggerOpen }"
                 @add-to-list="(chartID) => { addFavorite(chartID) }"
                 @delete-from-list="(chartID) => { deleteFavorite(chartID) }" />
+            <ScoreImportDialog v-model="showScoreImport"
+                @trigger-modal="(triggerModal) => { showScoreImport = triggerModal }" />
         </v-row>
         <v-pagination :length="pageCount" v-model="currentPage">
 
@@ -65,11 +77,13 @@
 import axios from 'axios'
 import ChartCard from './ChartCard.vue'
 import ChartModal from './ChartModal.vue'
+import ScoreImportDialog from './ScoreImportDialog.vue'
 import { toRomaji } from 'wanakana'
 export default {
     components: {
         ChartCard,
-        ChartModal
+        ChartModal,
+        ScoreImportDialog,
     },
 
     computed: {
@@ -120,12 +134,16 @@ export default {
             toggleFilters: true,
 
             // Snackbar/toaster
-            snackbar: false,
-            snackbarText: "",
+            snackbarWarn: false,
+            snackbarError: false,
+            snackbarWarnText: "",
+            snackbarErrorText: "",
 
             // Misc.
             charts: [],
+            scores: new Map(),
             showModal: false,
+            showScoreImport: false,
             favorites: [],
             loading: true,
         }
@@ -139,7 +157,7 @@ export default {
         },
 
         clearCache() {
-            if(confirm("Are you sure you want to clear cached chart data?"))  {
+            if (confirm("Are you sure you want to clear cached chart data?")) {
                 localStorage.removeItem("cache")
                 window.location.reload()
             }
@@ -153,8 +171,15 @@ export default {
 
         deleteFavorites() {
             if (confirm("Are you sure you want to remove all favorites?")) {
-                window.location.reload()
                 localStorage.setItem("favorites", JSON.stringify([]))
+                window.location.reload()
+            }
+        },
+
+        deleteScores() {
+            if (confirm("Are you sure you want to clear local scores?")) {
+                localStorage.removeItem("scores")
+                window.location.reload()
             }
         },
 
@@ -216,8 +241,8 @@ export default {
             const chartList = this.getFilteredCharts()
 
             if (chartList.length <= 0) {
-                this.snackbar = true
-                this.snackbarText = "No charts to randomize!"
+                this.snackbarWarn = true
+                this.snackbarWarnText = "No charts to randomize!"
                 return
             }
 
@@ -249,6 +274,7 @@ export default {
                         level: chart.level,
                         internal_level: chart.internal_level,
                         type: chart.type,
+                        score: this.scores.get(chart.id)
                     })
                 }
             }
@@ -261,11 +287,35 @@ export default {
     },
 
     mounted() {
-        let localFav = JSON.parse(localStorage.getItem("favorites"))
-        if (localFav === null) {
-            localFav = []
+        try {
+            let localFav = JSON.parse(localStorage.getItem("favorites"))
+            if (localFav === null) {
+                localFav = []
+            }
+            this.favorites = localFav
+        } catch (err) {
+            console.error(err)
+            localStorage.removeItem("favorites")
+            this.snackbarError = true
+            this.snackbarErrorText = "Failed parsing favorites data, is it corrupt? Clearing favorites..."
         }
-        this.favorites = localFav
+
+        try {
+            let localScores = JSON.parse(localStorage.getItem("scores"))
+            if (localScores === null) {
+                localScores = []
+            }
+            let scoreMapping = new Map()
+            for (const score of localScores) {
+                scoreMapping.set(score[0], score[1])
+            }
+            this.scores = scoreMapping
+        } catch (err) {
+            console.error(err)
+            localStorage.removeItem("scores")
+            this.snackbarError = true
+            this.snackbarErrorText = "Failed parsing score data, is it corrupt? Clearing scores..."
+        }
 
         let cache = localStorage.getItem("cache")
         if (cache === null) {
@@ -277,17 +327,16 @@ export default {
                 })
                 .catch((err) => {
                     console.error(err)
-                    this.snackbar = true
-                    this.snackbarText = err.message
+                    this.snackbarError = true
+                    this.snackbarErrorText = err.message
                     this.loading = false
                 })
         } else {
             cache = JSON.parse(cache)
             this.unpackData(cache)
-            this.snackbarText = "Loaded data from cache"
-            this.snackbar = true
+            this.snackbarWarnText = "Loaded data from cache"
+            this.snackbarWarn = true
         }
-
     },
 }
 </script>
