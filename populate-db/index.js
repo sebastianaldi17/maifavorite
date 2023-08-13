@@ -31,7 +31,7 @@ async function main() {
     spreadsheet.useApiKey(process.env.GOOGLE_KEY);
     await spreadsheet.loadInfo();
     // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
-    await UpdateInternalLevel(client, spreadsheet, 'FESTiVAL+新曲', [0, 1, 2, 4], [0, 6, 12]);
+    await UpdateInternalLevel(client, spreadsheet, 'FESTiVAL+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);
     await UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 14, 21]);
     await UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 7, 14, 21]);
     await UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35, 42, 49]);

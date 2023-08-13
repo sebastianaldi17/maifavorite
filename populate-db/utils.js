@@ -61,7 +61,8 @@ const titleHotfix = new Map(
         ['ぼくたちいつでもしゅわっしゅわ！', `ぼくたちいつでも　しゅわっしゅわ！`],
         ['Boys O\'Clock', `Boys O’Clock`],
         ['God Knows…', `God knows...`],
-        ['Bad Apple!! feat.nomico 〜五十嵐撫子Ver.〜', 'Bad Apple!! feat.nomico ～五十嵐 撫子 Ver.～']
+        ['Bad Apple!! feat.nomico 〜五十嵐撫子Ver.〜', 'Bad Apple!! feat.nomico ～五十嵐 撫子 Ver.～'],
+        ['超熊猫的周遊記(ワンダーパンダートラベラー)', '超熊猫的周遊記（ワンダーパンダートラベラー）'],
     ]
 )
 
