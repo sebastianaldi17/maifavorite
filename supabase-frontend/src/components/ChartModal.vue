@@ -28,7 +28,7 @@
             <v-card-text>
                 Version: {{ chartData.version }}
             </v-card-text>
-            <v-card-text>
+            <v-card-text v-if="chartData.score !== undefined">
                 Your best: {{ chartData.score }}
             </v-card-text>
             <v-divider></v-divider>
