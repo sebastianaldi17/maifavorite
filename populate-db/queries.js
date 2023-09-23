@@ -2,16 +2,7 @@ module.exports.queryInsertSong = `
     INSERT INTO SONGS(title_kana, title, category, artist, imageUrl, version)
     VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (title_kana)
-    DO UPDATE
-    SET
-        title_kana = excluded.title_kana,
-        title = excluded.title,
-        category = excluded.category,
-        artist = excluded.artist,
-        imageUrl = excluded.imageUrl,
-        version = excluded.version,
-        last_update = now()
-
+    DO NOTHING
 `
 module.exports.queryInsertCharts = function (brackets) {
     return `

@@ -29,9 +29,9 @@
         <v-btn color="pink-accent-2" class="mb-4 mr-2" @click="deleteScores">Clear scores</v-btn>
         <v-row v-if="toggleFilters">
             <v-col>
-                <v-text-field label="Title search" v-model="titleFilter" />
-                <v-text-field label="Title (romaji) search" v-model="titleRomajiFilter" />
-                <v-text-field label="Artist search" v-model="artistFilter" />
+                <v-combobox label="Title search" v-model="titleFilter" :items="titles"/>
+                <v-combobox label="Title (romaji) search" v-model="titleRomajiFilter" :items="romajis"/>
+                <v-combobox label="Artist search" v-model="artistFilter" :items="artists"/>
                 <v-row>
                     <v-col cols="6">
                         <v-text-field label="Min level" v-model="minInternalFilter" type="number" min="1" max="15"
@@ -105,10 +105,13 @@ export default {
     data() {
         return {
             // Fixed values
+            artists: [],
             categories: [],
-            chartTypes: ['STD', 'DX', '*'],
+            chartTypes: ['STD', 'DX', 'UTAGE', '*'],
             difficulties: ['BASIC', 'ADVANCED', 'EXPERT', 'MASTER', 'RE:MASTER'],
             versions: [],
+            titles: [],
+            romajis: [],
 
             // Datas used for modal
             modalData: {},
@@ -159,6 +162,7 @@ export default {
         clearCache() {
             if (confirm("Are you sure you want to clear cached chart data?")) {
                 localStorage.removeItem("cache")
+                localStorage.setItem("cacheDate", Date.now().toString())
                 window.location.reload()
             }
         },
@@ -255,11 +259,17 @@ export default {
         unpackData(data) {
             let versionSet = new Set()
             let categorySet = new Set()
+            let titleSet = new Set()
+            let romajiSet = new Set()
+            let artistSet = new Set()
             let fetchedCharts = []
             for (let i = 0; i < data.length; i += 1) {
                 let song = data[i]
                 versionSet.add(song.version)
                 categorySet.add(song.category)
+                titleSet.add(song.title)
+                romajiSet.add(toRomaji(song.title_kana))
+                artistSet.add(song.artist)
                 for (let j = 0; j < song.diff.length; j += 1) {
                     let chart = song.diff[j]
                     fetchedCharts.push({
@@ -278,8 +288,11 @@ export default {
                     })
                 }
             }
+            this.artists = [...artistSet]
             this.charts = fetchedCharts
             this.categories = [...categorySet]
+            this.romajis = [...romajiSet]
+            this.titles = [...titleSet]
             this.versions = [...versionSet]
             this.charts.reverse()
             this.loading = false
@@ -287,6 +300,24 @@ export default {
     },
 
     mounted() {
+        try {
+            let cacheDate = Number.parseInt(localStorage.getItem("cacheDate"))
+            if(isNaN(cacheDate)) {
+                throw "Cache date not a number"
+            }
+            if(Date.now() - cacheDate > 86400000) {
+                this.snackbarError = true
+                this.snackbarErrorText = "Cache is stale, fetching new data..."
+                localStorage.setItem("cacheDate", Date.now().toString())
+                localStorage.removeItem("cache")
+            }
+        } catch (err) {
+            localStorage.setItem("cacheDate", Date.now().toString())
+            localStorage.removeItem("cache")
+            this.snackbarError = true
+            this.snackbarErrorText = "Cache timestamp broken / not found, removing stale data..."
+        }
+
         try {
             let localFav = JSON.parse(localStorage.getItem("favorites"))
             if (localFav === null) {

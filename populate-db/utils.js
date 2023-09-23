@@ -23,6 +23,7 @@ const versionMapping = new Map(
         [225, 'UNiVERSE PLUS'],
         [230, 'FESTiVAL'],
         [235, 'FESTiVAL PLUS'],
+        [240, 'BUDDiES']
     ]
 );
 
@@ -66,37 +67,56 @@ const titleHotfix = new Map(
     ]
 )
 
-module.exports.InsertSong = async function (client, song) {
+module.exports.GenerateID = function(song) {
+    var title = song.title_kana;
+    if (song.catcode === '宴会場') {
+        if(song.comment === 'バンドメンバーを集めて挑め！（ヒーロー級）') {
+            title = '[UTAGE] セイシユンコンフレツクス (ヒーロー)';
+        } else if (song.comment === 'バンドメンバーを集めて楽しもう！（入門編）') {
+            title = '[UTAGE] セイシユンコンフレツクス (入門編)';
+        } else {
+            title = '[UTAGE] ' + title;
+        }
+    }
+    return title;
+}
+
+module.exports.InsertSong = async function (client, song, ID) {
     const versionKey = Number(song.version.substring(0, 3));
     const version = versionMapping.get(versionKey);
     await client.query(
-        queryInsertSong, [song.title_kana, song.title.trim(), song.catcode, song.artist, `https://maimaidx.jp/maimai-mobile/img/Music/${song.image_url}`, version]
-    ).then(() => {
-        console.log(`${song.title} added to song table`);
+        queryInsertSong, [ID, song.title.trim(), song.catcode, song.artist, `https://maimaidx.jp/maimai-mobile/img/Music/${song.image_url}`, version]
+    ).then((res) => {
+        if(res.rowCount > 0) {
+            console.log(`${song.title.trim()} / ${ID} added to song table`);
+        } else {
+            console.log(`${ID} already exists on song table`);
+        }
     }).catch((error) => {
         console.error(error);
         process.exit();
     });
 }
 
-module.exports.InsertChart = async function (client, song) {
+module.exports.InsertChart = async function (client, song, ID) {
     let values = [
-        [song.title_kana, 'STD', 'BASIC', song.lev_bas],
-        [song.title_kana, 'STD', 'ADVANCED', song.lev_adv],
-        [song.title_kana, 'STD', 'EXPERT', song.lev_exp],
-        [song.title_kana, 'STD', 'MASTER', song.lev_mas],
-        [song.title_kana, 'STD', 'RE:MASTER', song.lev_remas],
-        [song.title_kana, 'DX', 'BASIC', song.dx_lev_bas],
-        [song.title_kana, 'DX', 'ADVANCED', song.dx_lev_adv],
-        [song.title_kana, 'DX', 'EXPERT', song.dx_lev_exp],
-        [song.title_kana, 'DX', 'MASTER', song.dx_lev_mas],
-        [song.title_kana, 'DX', 'RE:MASTER', song.dx_lev_remas],
+        [ID, 'STD', 'BASIC', song.lev_bas],
+        [ID, 'STD', 'ADVANCED', song.lev_adv],
+        [ID, 'STD', 'EXPERT', song.lev_exp],
+        [ID, 'STD', 'MASTER', song.lev_mas],
+        [ID, 'STD', 'RE:MASTER', song.lev_remas],
+        [ID, 'DX', 'BASIC', song.dx_lev_bas],
+        [ID, 'DX', 'ADVANCED', song.dx_lev_adv],
+        [ID, 'DX', 'EXPERT', song.dx_lev_exp],
+        [ID, 'DX', 'MASTER', song.dx_lev_mas],
+        [ID, 'DX', 'RE:MASTER', song.dx_lev_remas],
+        [ID, 'UTAGE', 'UTAGE', song.lev_utage],
     ].filter((chart) => { return chart[3] })
 
     for (let i = 0; i < values.length; i += 1) {
         let level = values[i][3];
         let plus = level.includes('+');
-        let parsedLevel = parseInt(level.replace('+', ''));
+        let parsedLevel = parseInt(level.replace('+', '').replace('?', ''));
         if (plus) {
             parsedLevel += 0.7;
         }
