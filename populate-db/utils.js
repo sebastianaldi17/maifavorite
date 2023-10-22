@@ -64,6 +64,7 @@ const titleHotfix = new Map(
         ['God Knows…', `God knows...`],
         ['Bad Apple!! feat.nomico 〜五十嵐撫子Ver.〜', 'Bad Apple!! feat.nomico ～五十嵐 撫子 Ver.～'],
         ['超熊猫的周遊記(ワンダーパンダートラベラー)', '超熊猫的周遊記（ワンダーパンダートラベラー）'],
+        ['SQUAD -Phvntom-', 'SQUAD-Phvntom-'],
     ]
 )
 

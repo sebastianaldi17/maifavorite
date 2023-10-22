@@ -11,7 +11,7 @@
   "dependencies": {
     "axios": "^1.3.5",
     "vue": "^3.2.47",
-    "vuetify": "^3.1.14",
+    "vuetify": "^3.3.22",
     "wanakana": "^5.1.0"
   },
   "devDependencies": {
