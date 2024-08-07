@@ -9,16 +9,16 @@ on a separate table.
 
 # Directory explanation
 
-- backend: Golang REST API that serves chart data & favorite data
-- dbscripts: Contains SQL scripts that creates the tables required to store
-  chart data
-- frontend: Vue web app that displays chart & favorite data. Needs `backend` to
+- backend (deprecated): Golang REST API that serves chart data & favorite data
+- frontend (deprecated): Vue web app that displays chart & favorite data. Needs `backend` to
   be running. No longer maintained in favor of `supabase-frontend`
+- dbscripts: Contains SQL scripts that creates the tables required to store
+  chart data. Will update if there are any schema updates.
 - populate-db: Node script that fetches chart data and stores it to a postgres
   database
 - supabase-serverless: Supabase edge function that serves ONLY chart data.
 - supabase-frontend: A frontend version that uses the Supabase edge function on
-  `supabase-serverless`, and stores favorites using `localStorage`.
+  `supabase-serverless`, and stores favorites using `localStorage`. Hosted [here](https://sebastianaldi17.github.io/).
 
 # Initial setup
 
@@ -32,8 +32,7 @@ what to do.
    - The sample env file already contains all of the default data needed, so all
      you have to do is to fill the Google API key.
    - Alternatively, you can choose not to fill the internal level data, and just
-     comment out all lines between `const spreadsheet` and
-     `await UpdateInternallevel` (as of writing, comment out lines 30 to 35)
+     comment out the line above `process.exit()` (which should be the `await UpdateXXXInternalLevel()`)
 3. Go to `frontend` and run `npm run dev`.
 
 ## Serving on Supabase

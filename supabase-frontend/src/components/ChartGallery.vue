@@ -22,33 +22,29 @@
                 </v-btn>
             </template>
         </v-snackbar>
-        <v-btn color="teal-lighten-2" class="mb-4 mr-2" @click="() => { toggleFilters = !toggleFilters }">Toggle
+        <v-btn color="teal-lighten-2" class="mb-4 mr-2" @click="() => { toggleFilters = !toggleFilters }">Show/Hide
             filters</v-btn>
         <v-btn color="red-accent-4" class="mb-4 mr-2" @click="clearCache">Clear cache</v-btn>
-        <v-btn color="deep-purple-darken-3" class="mb-4 mr-2" @click="() => { showScoreImport = true }">Import score</v-btn>
-        <v-btn color="pink-accent-2" class="mb-4 mr-2" @click="deleteScores">Clear scores</v-btn>
+        <v-btn color="blue-lighten-1" @click="getRandomChart" class="mb-4 mr-2">Randomize</v-btn>
+        <v-btn color="red-lighten-1" @click="deleteFavorites" class="mb-4 mr-2">Clear Favorites</v-btn>
         <v-row v-if="toggleFilters">
             <v-col>
                 <v-combobox label="Title search" v-model="titleFilter" :items="titles"/>
                 <v-combobox label="Title (romaji) search" v-model="titleRomajiFilter" :items="romajis"/>
                 <v-combobox label="Artist search" v-model="artistFilter" :items="artists"/>
-                <v-row>
+                <v-row v-if="toggleComplexDifficulty">
                     <v-col cols="6">
-                        <v-text-field label="Min level" v-model="minInternalFilter" type="number" min="1" max="15"
-                            step="0.1"></v-text-field>
+                        <v-select label="Min level" v-model="minInternalFilter" :items="internalDifficultiesFilter"></v-select>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field label="Max level" v-model="maxInternalFilter" type="number" min="1" max="15"
-                            step="0.1"></v-text-field>
+                        <v-select label="Max level" v-model="maxInternalFilter" :items="internalDifficultiesFilter"></v-select>
                     </v-col>
                 </v-row>
-                <v-select label="Type filter" :items="chartTypes" v-model="typeFilter" />
+                <v-select label="Type filter" :items="chartTypes" v-model="typesFilter" chips multiple clearable />
                 <v-select label="Version select" :items="versions" v-model="versionsFilter" chips multiple clearable />
                 <v-select label="Cateogry select" :items="categories" v-model="categoriesFilter" chips multiple clearable />
                 <v-select label="Difficulty select" :items="difficulties" v-model="difficultiesFilter" chips multiple
                     clearable />
-                <v-btn color="blue-lighten-1" @click="getRandomChart" class="mr-2">Randomize</v-btn>
-                <v-btn color="red-lighten-1" @click="deleteFavorites" class="ma-2">Clear Favorites</v-btn>
                 <v-col cols="6">
                     <v-switch v-model="toggleFavorite" label="Favorites only?" color="red"></v-switch>
                 </v-col>
@@ -56,6 +52,9 @@
             </v-col>
         </v-row>
         <v-row>
+            <v-progress-linear v-model="filteredChartPercent" :height="16" color="red-lighten-2">
+                {{ `${filteredChartCount} / ${chartCount} charts` }}
+            </v-progress-linear>
             <v-col v-for="chart in filteredCharts" :key="chart.id" cols="6" sm="4" md="3" lg="2">
                 <ChartCard :chart-data="chart" @passed-chart="(chartData) => { modalData = chartData }"
                     @trigger-open="(triggerOpen) => { showModal = triggerOpen }" />
@@ -63,9 +62,10 @@
             <ChartModal :is-favorite="favorites.includes(modalData.id)" :chart-data="modalData" v-model="showModal"
                 @trigger-open="(triggerOpen) => { showModal = triggerOpen }"
                 @add-to-list="(chartID) => { addFavorite(chartID) }"
-                @delete-from-list="(chartID) => { deleteFavorite(chartID) }" />
-            <ScoreImportDialog v-model="showScoreImport"
-                @trigger-modal="(triggerModal) => { showScoreImport = triggerModal }" />
+                @delete-from-list="(chartID) => { deleteFavorite(chartID) }" 
+                @copy-to-clipboard-title="(chartTitle) => {snackbarWarnText = `Copied ${chartTitle} to clipboard.`}"
+                @copy-to-clipboard-bool="(showModal) => {snackbarWarn = showModal}"
+                />
         </v-row>
         <v-pagination :length="pageCount" v-model="currentPage">
 
@@ -77,16 +77,26 @@
 import axios from 'axios'
 import ChartCard from './ChartCard.vue'
 import ChartModal from './ChartModal.vue'
-import ScoreImportDialog from './ScoreImportDialog.vue'
 import { toRomaji } from 'wanakana'
 export default {
     components: {
         ChartCard,
         ChartModal,
-        ScoreImportDialog,
     },
 
     computed: {
+        chartCount() {
+            return this.charts.length
+        },
+
+        filteredChartCount() {
+            return this.getFilteredCharts().length
+        },
+
+        filteredChartPercent() {
+            return this.getFilteredCharts().length / parseFloat(this.charts.length) * 100
+        },
+
         filteredCharts() {
             const finalCharts = this.getFilteredCharts()
 
@@ -107,7 +117,7 @@ export default {
             // Fixed values
             artists: [],
             categories: [],
-            chartTypes: ['STD', 'DX', 'UTAGE', '*'],
+            chartTypes: ['STD', 'DX', 'UTAGE'],
             difficulties: ['BASIC', 'ADVANCED', 'EXPERT', 'MASTER', 'RE:MASTER'],
             versions: [],
             titles: [],
@@ -125,16 +135,18 @@ export default {
             titleFilter: "",
             titleRomajiFilter: "",
             artistFilter: "",
-            typeFilter: "*",
+            typesFilter: [],
             versionsFilter: [],
             categoriesFilter: [],
             minInternalFilter: "1",
             maxInternalFilter: "15",
             difficultiesFilter: [],
+            internalDifficultiesFilter: [],
 
             // Toggles
             toggleFavorite: false,
             toggleFilters: true,
+            toggleComplexDifficulty: true,
 
             // Snackbar/toaster
             snackbarWarn: false,
@@ -144,9 +156,7 @@ export default {
 
             // Misc.
             charts: [],
-            scores: new Map(),
             showModal: false,
-            showScoreImport: false,
             favorites: [],
             loading: true,
         }
@@ -180,33 +190,26 @@ export default {
             }
         },
 
-        deleteScores() {
-            if (confirm("Are you sure you want to clear local scores?")) {
-                localStorage.removeItem("scores")
-                window.location.reload()
-            }
-        },
-
         getFilteredCharts() {
             let finalCharts = this.charts
 
             // Title filter
             finalCharts = finalCharts.filter((chart) => {
-                return chart.title.toLowerCase().includes(this.titleFilter.toLowerCase())
+                return !this.titleFilter || chart.title.toLowerCase().includes(this.titleFilter.toLowerCase())
             })
 
             finalCharts = finalCharts.filter((chart) => {
-                return chart.title_romaji.toLowerCase().includes(this.titleRomajiFilter.toLowerCase())
+                return !this.titleRomajiFilter || chart.title_romaji.toLowerCase().includes(this.titleRomajiFilter.toLowerCase())
             })
 
             // Artist filter
             finalCharts = finalCharts.filter((chart) => {
-                return chart.artist.toLowerCase().includes(this.artistFilter.toLowerCase())
+                return !this.artistFilter || chart.artist.toLowerCase().includes(this.artistFilter.toLowerCase())
             })
 
             // Type filter (STD, DX)
             finalCharts = finalCharts.filter((chart) => {
-                return this.typeFilter === "*" || chart.type === this.typeFilter
+                return this.typesFilter <= 0 || this.typesFilter.includes(chart.type)
             })
 
             // Version filter
@@ -262,6 +265,7 @@ export default {
             let titleSet = new Set()
             let romajiSet = new Set()
             let artistSet = new Set()
+            let internalDifficultySet = new Set()
             let fetchedCharts = []
             for (let i = 0; i < data.length; i += 1) {
                 let song = data[i]
@@ -272,6 +276,7 @@ export default {
                 artistSet.add(song.artist)
                 for (let j = 0; j < song.diff.length; j += 1) {
                     let chart = song.diff[j]
+                    internalDifficultySet.add(parseFloat(chart.internal_level).toFixed(1))
                     fetchedCharts.push({
                         artist: song.artist,
                         category: song.category,
@@ -284,7 +289,6 @@ export default {
                         level: chart.level,
                         internal_level: chart.internal_level,
                         type: chart.type,
-                        score: this.scores.get(chart.id)
                     })
                 }
             }
@@ -294,6 +298,8 @@ export default {
             this.romajis = [...romajiSet]
             this.titles = [...titleSet]
             this.versions = [...versionSet]
+            this.internalDifficultiesFilter = [...internalDifficultySet]
+            this.internalDifficultiesFilter.sort((a, b) => {return a-b})
             this.charts.reverse()
             this.loading = false
         }
@@ -329,23 +335,6 @@ export default {
             localStorage.removeItem("favorites")
             this.snackbarError = true
             this.snackbarErrorText = "Failed parsing favorites data, is it corrupt? Clearing favorites..."
-        }
-
-        try {
-            let localScores = JSON.parse(localStorage.getItem("scores"))
-            if (localScores === null) {
-                localScores = []
-            }
-            let scoreMapping = new Map()
-            for (const score of localScores) {
-                scoreMapping.set(score[0], score[1])
-            }
-            this.scores = scoreMapping
-        } catch (err) {
-            console.error(err)
-            localStorage.removeItem("scores")
-            this.snackbarError = true
-            this.snackbarErrorText = "Failed parsing score data, is it corrupt? Clearing scores..."
         }
 
         let cache = localStorage.getItem("cache")

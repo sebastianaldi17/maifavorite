@@ -13,6 +13,7 @@
                 </v-chip>
             </v-img>
             <v-card-title>
+                <v-icon icon="mdi-clipboard" @click="()=>{copyToClipboard(chartData.title)}"> </v-icon>
                 {{ chartData.title }}
             </v-card-title>
             <v-divider></v-divider>
@@ -27,9 +28,6 @@
             </v-card-text>
             <v-card-text>
                 Version: {{ chartData.version }}
-            </v-card-text>
-            <v-card-text v-if="chartData.score !== undefined">
-                Your best: {{ chartData.score }}
             </v-card-text>
             <v-divider></v-divider>
             <v-text-field label="Accuracy" v-model="accuracy" type="number" min="0" max="101" step="any" v-if="chartData.type !== 'UTAGE'"  />
@@ -74,7 +72,17 @@ export default {
         }
     },
 
-    emits: ['addToList', 'deleteFromList', 'triggerOpen'],
+    emits: ['addToList', 'deleteFromList', 'copyToClipboardBool', 'copyToClipboardTitle', 'triggerOpen'],
+
+    methods: {
+        copyToClipboard(title) {
+            if(confirm(`Copy ${title} to clipboard?`)) {
+                navigator.clipboard.writeText(title)
+                this.$emit("copyToClipboardTitle", title)
+                this.$emit("copyToClipboardBool", true)
+            }
+        }
+    },
 
     watch: {
         chartData() {
