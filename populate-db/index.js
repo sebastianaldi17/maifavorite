@@ -25,9 +25,9 @@ async function main() {
                 if(titles.has(title)) {
                     console.log(`${title} is duplicate title`);
                     console.error(`${title} is duplicate title`);
-                    return
+                    process.exit(0);
                 }
-                titles.add(title)
+                titles.add(title);
             }
             console.log("Duplicate check finished")
             for (const song of results.data) {
@@ -41,7 +41,7 @@ async function main() {
             process.exit();
         })
 
-    await UpdateBuddiesInternalDifficulty();
+    await UpdateBuddiesPlusInternalDifficulty();
     process.exit();
 }
 
@@ -62,10 +62,21 @@ async function UpdateBuddiesInternalDifficulty() {
     spreadsheet.useApiKey(process.env.GOOGLE_KEY);
     await spreadsheet.loadInfo();
     // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
-    await UpdateInternalLevel(client, spreadsheet, 'BUDDiES新曲', [0, 1, 2, 4], [0, 6]);
+    await UpdateInternalLevel(client, spreadsheet, 'BUDDiES新曲', [0, 1, 2, 4], [0, 6, 12, 18, 24]);
     await UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35]);
     await UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 7, 14, 21]);
     await UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35, 42]);
+}
+
+async function UpdateBuddiesPlusInternalDifficulty() {
+    const spreadsheet = new GoogleSpreadsheet('1d1AjO92Hj-iay10MsqdR_5TswEaikzC988aEOtFyybo');
+    spreadsheet.useApiKey(process.env.GOOGLE_KEY);
+    await spreadsheet.loadInfo();
+    // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
+    await UpdateInternalLevel(client, spreadsheet, 'BUDDiES+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);
+    await UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 15, 22, 29, 37]);
+    await UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 8, 15, 22, 29]);
+    await UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 8, 18, 25, 32, 39, 47]);
 }
 
 main();

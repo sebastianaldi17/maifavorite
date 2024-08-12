@@ -23,7 +23,8 @@ const versionMapping = new Map(
         [225, 'UNiVERSE PLUS'],
         [230, 'FESTiVAL'],
         [235, 'FESTiVAL PLUS'],
-        [240, 'BUDDiES']
+        [240, 'BUDDiES'],
+        [245, 'BUDDiES PLUS']
     ]
 );
 
@@ -65,6 +66,7 @@ const titleHotfix = new Map(
         ['Bad Apple!! feat.nomico 〜五十嵐撫子Ver.〜', 'Bad Apple!! feat.nomico ～五十嵐 撫子 Ver.～'],
         ['超熊猫的周遊記(ワンダーパンダートラベラー)', '超熊猫的周遊記（ワンダーパンダートラベラー）'],
         ['SQUAD -Phvntom-', 'SQUAD-Phvntom-'],
+        ['ずんだもんの朝食　～目覚ましずんラップ～', 'ずんだもんの朝食　〜目覚ましずんラップ〜']
     ]
 )
 
@@ -75,9 +77,14 @@ module.exports.GenerateID = function(song) {
             title = '[UTAGE] セイシユンコンフレツクス (ヒーロー)';
         } else if (song.comment === 'バンドメンバーを集めて楽しもう！（入門編）') {
             title = '[UTAGE] セイシユンコンフレツクス (入門編)';
+        } else if (song.title_kana === 'GARAKUTADOLLPLAY') {
+            title = '[UTAGE] ' + song.title;
         } else {
             title = '[UTAGE] ' + title;
         }
+    }
+    if (song.title === 'Trust') {
+        title = title + ' Massive New Krew feat. 光吉猛修'
     }
     return title;
 }
@@ -119,7 +126,7 @@ module.exports.InsertChart = async function (client, song, ID) {
         let plus = level.includes('+');
         let parsedLevel = parseInt(level.replace('+', '').replace('?', ''));
         if (plus) {
-            parsedLevel += 0.7;
+            parsedLevel += 0.6;
         }
         values[i].push(parsedLevel);
     }
