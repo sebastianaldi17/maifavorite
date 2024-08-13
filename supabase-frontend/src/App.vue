@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-app-bar app color="purple-lighten-1">
-      <v-toolbar-title>MaiFavorite v1.1.1 </v-toolbar-title>
+      <v-toolbar-title>MaiChartList v1.1.1 </v-toolbar-title>
       <template v-slot:append>
         <v-btn prepend-icon="mdi-information-outline" @click="()=> {showAbout = true}">About</v-btn>
       </template>
