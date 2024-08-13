@@ -12,26 +12,26 @@
                     {{ internalLevel }}
                 </v-chip>
             </v-img>
-            <v-card-title>
+            <v-card-title class="pl-4">
                 <v-icon icon="mdi-clipboard" @click="()=>{copyToClipboard(chartData.title)}"> </v-icon>
                 {{ chartData.title }}
             </v-card-title>
             <v-divider></v-divider>
-            <v-card-text>
+            <v-card-text class="py-1 pl-4">
                 Title (romaji): {{ chartData.title_romaji }}
             </v-card-text>
-            <v-card-text>
+            <v-card-text class="py-1 pl-4">
                 Artist: {{ chartData.artist }}
             </v-card-text>
-            <v-card-text>
+            <v-card-text class="py-1 pl-4">
                 Category: {{ chartData.category }}
             </v-card-text>
-            <v-card-text>
+            <v-card-text class="py-1 pb-2 pl-4">
                 Version: {{ chartData.version }}
             </v-card-text>
             <v-divider></v-divider>
-            <v-text-field label="Accuracy" v-model="accuracy" type="number" min="0" max="101" step="any" v-if="chartData.type !== 'UTAGE'"  />
-            <v-card-text v-if="chartData.type !== 'UTAGE'">
+            <v-text-field label="Accuracy" v-model="accuracy" type="number" min="0" max="101" step="any" v-if="chartData.type !== 'UTAGE'" hide-details />
+            <v-card-text v-if="chartData.type !== 'UTAGE'" class="pt-2 pb-0 pl-4">
                 Estimated rating: {{ estimatedRating }}
             </v-card-text>
             <v-card-actions>

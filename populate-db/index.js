@@ -46,8 +46,7 @@ async function main() {
 }
 
 async function UpdateFestivalPlusInternalDifficulty() {
-    const spreadsheet = new GoogleSpreadsheet('1xqXfzfDfxiEE9mREwgX_ITIY8AowRM7w-TH2t1I_RJE');
-    spreadsheet.useApiKey(process.env.GOOGLE_KEY);
+    const spreadsheet = new GoogleSpreadsheet('1xqXfzfDfxiEE9mREwgX_ITIY8AowRM7w-TH2t1I_RJE', {apiKey: process.env.GOOGLE_KEY});
     await spreadsheet.loadInfo();
     // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
     await UpdateInternalLevel(client, spreadsheet, 'FESTiVAL+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);
@@ -58,8 +57,7 @@ async function UpdateFestivalPlusInternalDifficulty() {
 }
 
 async function UpdateBuddiesInternalDifficulty() {
-    const spreadsheet = new GoogleSpreadsheet('1vSqx2ghJKjWwCLrDEyZTUMSy5wkq_gY4i0GrJgSreQc');
-    spreadsheet.useApiKey(process.env.GOOGLE_KEY);
+    const spreadsheet = new GoogleSpreadsheet('1vSqx2ghJKjWwCLrDEyZTUMSy5wkq_gY4i0GrJgSreQc', {apiKey: process.env.GOOGLE_KEY});
     await spreadsheet.loadInfo();
     // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
     await UpdateInternalLevel(client, spreadsheet, 'BUDDiES新曲', [0, 1, 2, 4], [0, 6, 12, 18, 24]);
@@ -69,8 +67,7 @@ async function UpdateBuddiesInternalDifficulty() {
 }
 
 async function UpdateBuddiesPlusInternalDifficulty() {
-    const spreadsheet = new GoogleSpreadsheet('1d1AjO92Hj-iay10MsqdR_5TswEaikzC988aEOtFyybo');
-    spreadsheet.useApiKey(process.env.GOOGLE_KEY);
+    const spreadsheet = new GoogleSpreadsheet('1d1AjO92Hj-iay10MsqdR_5TswEaikzC988aEOtFyybo', {apiKey: process.env.GOOGLE_KEY});
     await spreadsheet.loadInfo();
     // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
     await UpdateInternalLevel(client, spreadsheet, 'BUDDiES+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);

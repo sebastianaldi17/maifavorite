@@ -32,21 +32,30 @@
                 <v-combobox label="Title search" v-model="titleFilter" :items="titles"/>
                 <v-combobox label="Title (romaji) search" v-model="titleRomajiFilter" :items="romajis"/>
                 <v-combobox label="Artist search" v-model="artistFilter" :items="artists"/>
-                <v-row v-if="toggleComplexDifficulty">
+                <v-row>
                     <v-col cols="6">
-                        <v-select label="Min level" v-model="minInternalFilter" :items="internalDifficultiesFilter"></v-select>
+                        <v-select label="Min level" v-model="minInternalFilter" :items="internalDifficultiesFilter" hide-details></v-select>
                     </v-col>
                     <v-col cols="6">
-                        <v-select label="Max level" v-model="maxInternalFilter" :items="internalDifficultiesFilter"></v-select>
+                        <v-select label="Max level" v-model="maxInternalFilter" :items="internalDifficultiesFilter" hide-details></v-select>
                     </v-col>
                 </v-row>
-                <v-select label="Type filter" :items="chartTypes" v-model="typesFilter" chips multiple clearable />
-                <v-select label="Version select" :items="versions" v-model="versionsFilter" chips multiple clearable />
-                <v-select label="Cateogry select" :items="categories" v-model="categoriesFilter" chips multiple clearable />
-                <v-select label="Difficulty select" :items="difficulties" v-model="difficultiesFilter" chips multiple
-                    clearable />
+                <v-row>
+                    <v-col cols="6" sm="3">
+                        <v-select label="Type filter" :items="chartTypes" v-model="typesFilter" chips multiple clearable hide-details />
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                        <v-select label="Version select" :items="versions" v-model="versionsFilter" chips multiple clearable hide-details />
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                        <v-select label="Cateogry select" :items="categories" v-model="categoriesFilter" chips multiple clearable hide-details />
+                    </v-col>
+                    <v-col cols="6" sm="3">
+                        <v-select label="Difficulty select" :items="difficulties" v-model="difficultiesFilter" chips multiple clearable hide-details />
+                    </v-col>
+                </v-row>
                 <v-col cols="6">
-                    <v-switch v-model="toggleFavorite" label="Favorites only?" color="red"></v-switch>
+                    <v-switch v-model="toggleFavorite" label="Favorites only?" color="red" hide-details></v-switch>
                 </v-col>
                 <v-divider />
             </v-col>
@@ -146,7 +155,6 @@ export default {
             // Toggles
             toggleFavorite: false,
             toggleFilters: true,
-            toggleComplexDifficulty: true,
 
             // Snackbar/toaster
             snackbarWarn: false,
