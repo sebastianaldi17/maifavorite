@@ -6,52 +6,52 @@ const databaseUrl = Deno.env.get('SUPABASE_DB_URL')!
 const pool = new postgres.Pool(databaseUrl, 3, true)
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 type Row = {
-  title: string,
-  title_kana: string,
-  category: string,
-  artist: string,
-  version: string,
-  imageurl: string,
-  id: number,
-  type: string,
-  difficulty: string,
-  level: string,
-  internal_level: number,
+    title: string,
+    title_kana: string,
+    category: string,
+    artist: string,
+    version: string,
+    imageurl: string,
+    id: number,
+    type: string,
+    difficulty: string,
+    level: string,
+    internal_level: number,
 }
 
 type Song = {
-  title: string,
-  title_kana: string,
-  category: string,
-  artist: string,
-  version: string,
-  image_url: string,
-  diff: Chart[]
+    title: string,
+    title_kana: string,
+    category: string,
+    artist: string,
+    version: string,
+    image_url: string,
+    diff: Chart[]
 }
 
 type Chart = {
-  id: number,
-  type: string,
-  difficulty: string,
-  level: string,
-  internal_level: number,
+    id: number,
+    type: string,
+    difficulty: string,
+    level: string,
+    internal_level: number,
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
-
-  try {
-    const connection = await pool.connect()
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
 
     try {
-      const result = await connection.queryObject`
+        const connection = await pool.connect()
+        const queryStart = Date.now()
+        try {
+            const result = await connection.queryObject`
           SELECT
               charts.id,
               charts.type,
@@ -73,55 +73,59 @@ serve(async (req) => {
           ORDER BY
               charts.id
       `
+            console.log(`Query time: ${Date.now() - queryStart} ms`)
 
-      const songsMap: Map<string, Chart[]> = new Map()
-      const songsData: Map<string, Song> = new Map()
+            const patchStart = Date.now()
+            const songsMap: Map<string, Chart[]> = new Map()
+            const songsData: Map<string, Song> = new Map()
 
-      const charts: Row[] = result.rows as Row[]
-      charts.forEach(chart => {
-        songsData.set(chart.title, {
-          title: chart.title,
-          title_kana: chart.title_kana,
-          category: chart.category,
-          artist: chart.artist,
-          version: chart.version,
-          image_url: chart.imageurl
-       } as Song);
-        if (!songsMap.has(chart.title)) {
-            songsMap.set(chart.title, []);
-        }
-        const difflist = songsMap.get(chart.title)!;
-        difflist.push({id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level, internal_level: chart.internal_level} as Chart);
-        songsMap.set(chart.title, difflist);
-      })
-
-      const resObj: Song[] = [];
-        songsData.forEach((data, title) => {
-            resObj.push({
-                title: data.title,
-                title_kana: data.title_kana,
-                category: data.category,
-                artist: data.artist,
-                version: data.version,
-                image_url: data.image_url,
-                diff: songsMap.get(title)!,
+            const charts: Row[] = result.rows as Row[]
+            charts.forEach(chart => {
+                songsData.set(chart.title, {
+                    title: chart.title,
+                    title_kana: chart.title_kana,
+                    category: chart.category,
+                    artist: chart.artist,
+                    version: chart.version,
+                    image_url: chart.imageurl
+                } as Song);
+                if (!songsMap.has(chart.title)) {
+                    songsMap.set(chart.title, []);
+                }
+                const difflist = songsMap.get(chart.title)!;
+                difflist.push({ id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level, internal_level: chart.internal_level } as Chart);
+                songsMap.set(chart.title, difflist);
             })
-        })
 
-      const body = JSON.stringify(resObj)
+            const resObj: Song[] = [];
+            songsData.forEach((data, title) => {
+                resObj.push({
+                    title: data.title,
+                    title_kana: data.title_kana,
+                    category: data.category,
+                    artist: data.artist,
+                    version: data.version,
+                    image_url: data.image_url,
+                    diff: songsMap.get(title)!,
+                })
+            })
 
-      return new Response(body, {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-      })
-    } finally {
-      connection.release()
+            const body = JSON.stringify(resObj)
+
+            console.log(`Patch time: ${Date.now() - patchStart} ms`)
+
+            return new Response(body, {
+                status: 200,
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json'
+                },
+            })
+        } finally {
+            connection.release()
+        }
+    } catch (err) {
+        console.error(err)
+        return new Response(String(err?.message ?? err), { status: 500 })
     }
-  } catch (err) {
-    console.error(err)
-    return new Response(String(err?.message ?? err), { status: 500 })
-  }
 })

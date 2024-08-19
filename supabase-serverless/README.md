@@ -20,8 +20,26 @@ to serve maimai chart data.
 You might need to install deno and enable deno language support for linting
 purposes.
 
+# Developing locally
+
+## Starting
+```bash
+supabase start
+supabase functions serve
+```
+
+## Stopping
+```bash
+supabase stop
+```
+
+# Deploy to Supabase
+
 If there are any updates to the edge function, run
-`supabase functions deploy get-songs --no-verify-jwt` to update the cloud
+```bash
+supabase functions deploy get-songs --no-verify-jwt
+```
+to update the cloud
 function to the latest version.
 
 # References:
