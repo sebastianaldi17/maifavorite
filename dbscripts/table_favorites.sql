@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS favorites (
-    chart_id INTEGER NOT NULL UNIQUE,
-    date_added TIMESTAMP NOT NULL DEFAULT now()
-)

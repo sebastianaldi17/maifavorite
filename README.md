@@ -9,10 +9,6 @@ on a separate table.
 
 # Directory explanation
 
-- backend (deprecated): Golang REST API that serves chart data & favorite data
-- frontend (deprecated): Vue web app that displays chart & favorite data. Needs `backend` to
-  be running. No longer maintained in favor of `supabase-frontend`
-- scrape-scores (deprecated): Scrape scores from your maimainet. No longer used because I removed the function to import your score into the site.
 - dbscripts: Contains SQL scripts that creates the tables required to store
   chart data. Will update if there are any schema updates.
 - populate-db: Node script that fetches chart data and stores it to a postgres
