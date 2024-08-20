@@ -84,8 +84,8 @@
 
 <script>
 import axios from 'axios'
-import ChartCard from './ChartCard.vue'
-import ChartModal from './ChartModal.vue'
+import ChartCard from '../components/ChartCard.vue'
+import ChartModal from '../components/ChartModal.vue'
 import { toRomaji } from 'wanakana'
 export default {
     components: {

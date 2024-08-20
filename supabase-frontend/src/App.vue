@@ -1,33 +1,46 @@
 <template>
   <v-app id="inspire">
+    <v-navigation-drawer v-model="drawer" temporary>
+      <v-list-item prepend-icon="mdi-home" @click="redirectToHome">Home</v-list-item>
+      <v-list-item prepend-icon="mdi-lock-pattern" @click="redirectToPatterns">Patterns</v-list-item>
+      <v-list-item prepend-icon="mdi-information" @click="redirectToAbout">About</v-list-item>
+      <v-list-item prepend-icon="mdi-message" disabled>Feedback (W.I.P.)</v-list-item>
+    </v-navigation-drawer>
+
     <v-app-bar app color="purple-lighten-1">
-      <v-toolbar-title>MaiChartList v1.1.1 </v-toolbar-title>
-      <template v-slot:append>
-        <v-btn prepend-icon="mdi-information-outline" @click="()=> {showAbout = true}">About</v-btn>
-      </template>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title @click="$router.push('/')">
+        MaiChartList v1.2.0
+      </v-toolbar-title>
     </v-app-bar>
 
     <v-main>
-      <ChartGallery />
-      <About v-model="showAbout" @trigger-open="(triggerOpen) => {showAbout = triggerOpen}"/>
+      <RouterView />
     </v-main>
   </v-app>
 </template>
 
 <script>
-import About from './components/About.vue'
-import ChartGallery from './components/ChartGallery.vue'
+import { RouterView } from 'vue-router';
 
 export default {
-  components: {
-    About,
-    ChartGallery
-  },
-
   data() {
     return {
-      showAbout: false,
+      drawer: false,
     }
+  },
+  methods: {
+    redirectToAbout() {
+      this.$router.push({ name: 'about' })
+    },
+
+    redirectToHome() {
+      this.$router.push({ name: 'index' })
+    },
+
+    redirectToPatterns() {
+      this.$router.push({ name: 'patterns' })
+    },
   }
 }
 </script>
