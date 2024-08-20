@@ -3,7 +3,7 @@
         <v-row>
             <v-col cols="12" sm="6" md="4" v-for="pattern in patterns">
                 <v-row class="d-flex align-center justify-center">
-                    <video width="320" controls preload="metadata" :poster="`/thumbnail/${pattern.name}.webp`" onloadstart="this.volume=0.5">
+                    <video width="320" controls preload="none" :poster="`/thumbnail/${pattern.name}.webp`" onloadstart="this.volume=0.5">
                         <source :src="`/webm/${pattern.name}.webm`">
                     </video>
                 </v-row>
