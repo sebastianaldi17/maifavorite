@@ -8,6 +8,11 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 
+import { createRouter, createWebHistory } from 'vue-router'
+import Patterns from './pages/Patterns.vue'
+import ChartGallery from './pages/ChartGallery.vue'
+import About from './pages/About.vue'
+
 const vuetify = createVuetify({
     components,
     directives,
@@ -19,4 +24,19 @@ const vuetify = createVuetify({
     }
 })
 
-createApp(App).use(vuetify).mount('#app')
+const routes = [
+    { path: '/patterns', component: Patterns, name: 'patterns' },
+    { path: '/about', component: About, name: 'about' },
+    { path: '/', component: ChartGallery, name: 'index' },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
+]
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
+})
+
+const app = createApp(App)
+app.use(vuetify)
+app.use(router)
+app.mount('#app')
