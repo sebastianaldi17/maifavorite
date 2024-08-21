@@ -3,14 +3,6 @@
         <v-row>
             <v-switch v-model="loadVideo" label="Load video?" color="indigo"></v-switch>
         </v-row>
-        <!-- <v-row v-if="!loadVideo">
-            <v-col cols="12" sm="6" md="4" v-for="pattern in patterns">
-                <v-row class="d-flex align-center justify-center">
-                    <v-img :src="pattern.thumbnail_url" max-width="320"></v-img>
-                </v-row>
-                <a class="d-flex align-center justify-center mt-4" :href="pattern.youtube_url">{{ pattern.name }}</a>
-            </v-col>
-        </v-row> -->
         <v-row>
             <v-col cols="12" sm="6" md="4" v-for="pattern in patterns">
                 <v-row class="d-flex align-center justify-center">
