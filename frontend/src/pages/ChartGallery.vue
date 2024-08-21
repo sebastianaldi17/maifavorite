@@ -348,7 +348,7 @@ export default {
         let cache = localStorage.getItem("cache")
         if (cache === null) {
             axios
-                .get('https://lmqidayjwoayyhhejbtz.functions.supabase.co/get-songs')
+                .get(`${import.meta.env.VITE_API_URL}/get-songs`)
                 .then((resp) => {
                     localStorage.setItem("cache", JSON.stringify(resp.data))
                     this.unpackData(resp.data)

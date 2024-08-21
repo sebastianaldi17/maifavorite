@@ -9,13 +9,13 @@ on a separate table.
 
 # Directory explanation
 
-- dbscripts: Contains SQL scripts that creates the tables required to store
+- `dbscripts`: Contains SQL scripts that creates the tables required to store
   chart data. Will update if there are any schema updates.
-- populate-db: Node script that fetches chart data and stores it to a postgres
+- `populate-db`: Node script that fetches chart data and stores it to a postgres
   database
-- supabase-serverless: Supabase edge function that serves ONLY chart data.
-- supabase-frontend: A frontend version that uses the Supabase edge function on
-  `supabase-serverless`, and stores favorites using `localStorage`. Hosted [here](https://sebastianaldi17.github.io/).
+- `supabase-serverless`: Supabase edge function that serves ONLY chart data.
+- `frontend`: A frontend for `supabase-serverless`, and stores favorites using `localStorage`.
+  Hosted [here](https://maichartlist.netlify.app/).
 
 # Initial setup
 
