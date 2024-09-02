@@ -31,3 +31,34 @@ module.exports.queryUpdateInternalLevel = `
     AND
         charts.difficulty = $4
 `
+
+module.exports.queryGetPatterns = `
+    SELECT
+        id, name
+    FROM
+        patterns
+`
+
+module.exports.queryGetCharts = `
+    SELECT
+        charts.id as id,
+        charts.difficulty as difficulty,
+        songs.title as title,
+        charts.internal_level as level
+    FROM
+        charts
+    JOIN
+        songs
+    ON
+        charts.title_kana = songs.title_kana
+    ORDER BY
+        charts.internal_level DESC, id
+`
+
+module.exports.queryInsertChartPattern = function (brackets) {
+    return `
+    INSERT INTO chart_to_pattern(chart_id, pattern_id)
+    VALUES ${brackets.join(',')}
+    ON CONFLICT (chart_id, pattern_id)
+    DO NOTHING
+`}

@@ -22,6 +22,7 @@ type Row = {
     difficulty: string,
     level: string,
     internal_level: number,
+    pattern_name: string,
 }
 
 type Song = {
@@ -31,7 +32,7 @@ type Song = {
     artist: string,
     version: string,
     image_url: string,
-    diff: Chart[]
+    diff: Chart[],
 }
 
 type Chart = {
@@ -40,6 +41,7 @@ type Chart = {
     difficulty: string,
     level: string,
     internal_level: number,
+    patterns: string[],
 }
 
 serve(async (req) => {
@@ -63,21 +65,22 @@ serve(async (req) => {
               songs.category,
               songs.artist,
               songs.imageurl,
-              songs.version
+              songs.version,
+              COALESCE(patterns.name, '') as pattern_name
           FROM
               charts
-          LEFT JOIN
-              songs
-          ON
-              charts.title_kana = songs.title_kana
+          LEFT JOIN songs ON charts.title_kana = songs.title_kana
+          LEFT JOIN chart_to_pattern ON charts.id = chart_to_pattern.chart_id
+          LEFT JOIN patterns ON chart_to_pattern.pattern_id = patterns.id
           ORDER BY
               charts.id
       `
             console.log(`Query time: ${Date.now() - queryStart} ms`)
 
             const patchStart = Date.now()
-            const songsMap: Map<string, Chart[]> = new Map()
+            const songsMap: Map<string, Map<number, Chart>> = new Map()
             const songsData: Map<string, Song> = new Map()
+            const chartPatterns: Map<number, string[]> = new Map()
 
             const charts: Row[] = result.rows as Row[]
             charts.forEach(chart => {
@@ -88,17 +91,33 @@ serve(async (req) => {
                     artist: chart.artist,
                     version: chart.version,
                     image_url: chart.imageurl
-                } as Song);
+                } as Song)
                 if (!songsMap.has(chart.title)) {
-                    songsMap.set(chart.title, []);
+                    songsMap.set(chart.title, new Map<number, Chart>())
                 }
-                const difflist = songsMap.get(chart.title)!;
-                difflist.push({ id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level, internal_level: chart.internal_level } as Chart);
-                songsMap.set(chart.title, difflist);
+                if (!chartPatterns.has(chart.id)) {
+                    chartPatterns.set(chart.id, [])
+                }
+
+                if (chart.pattern_name !== "") {
+                    const currentPatterns = chartPatterns.get(chart.id)!
+                    currentPatterns.push(chart.pattern_name)
+                }
+
+                const difflist = songsMap.get(chart.title)!
+                difflist.set(chart.id, { id: chart.id, type: chart.type, difficulty: chart.difficulty, level: chart.level, internal_level: chart.internal_level } as Chart)
+                songsMap.set(chart.title, difflist)
             })
 
-            const resObj: Song[] = [];
+            const resObj: Song[] = []
             songsData.forEach((data, title) => {
+                const diffs: Chart[] = []
+                const diffMap = songsMap.get(title)!
+                diffMap.forEach((chart, chartID) => {
+                    chart.patterns = chartPatterns.get(chartID)!
+                    diffs.push(chart)
+                })
+
                 resObj.push({
                     title: data.title,
                     title_kana: data.title_kana,
@@ -106,7 +125,7 @@ serve(async (req) => {
                     artist: data.artist,
                     version: data.version,
                     image_url: data.image_url,
-                    diff: songsMap.get(title)!,
+                    diff: diffs,
                 })
             })
 

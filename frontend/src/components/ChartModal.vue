@@ -29,6 +29,11 @@
             <v-card-text class="py-1 pb-2 pl-4">
                 Version: {{ chartData.version }}
             </v-card-text>
+            <v-card-text class="pl-4 py-1">
+                <v-chip v-for="pattern in chartData.patterns" class="mr-1">
+                    {{ pattern }}
+                </v-chip>
+            </v-card-text>
             <v-divider></v-divider>
             <v-text-field label="Accuracy" v-model="accuracy" type="number" min="0" max="101" step="any" v-if="chartData.type !== 'UTAGE'" hide-details />
             <v-card-text v-if="chartData.type !== 'UTAGE'" class="pt-2 pb-0 pl-4">

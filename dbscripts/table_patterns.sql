@@ -24,4 +24,7 @@ VALUES
     ('zigzag', 'https://youtu.be/LX6Q31Yrnco?si=FUJNhwBUMn1yhpLe&t=63', '', ''),
     ('slide-tap', 'https://youtu.be/9rwdZ8oqfVs?si=Qj9N7Q6myD6kAcfm&t=37', '', ''),
     ('stream', 'https://youtu.be/4pVdhWrOSJE?si=4r4DkN9ttiAoOnLf&t=40', '', ''),
-    ('3-stream', 'https://youtu.be/kMt20N3760U?si=xXZHLC6YRzQtqYAe&t=124', '', '');
+    ('3-stream', 'https://youtu.be/kMt20N3760U?si=xXZHLC6YRzQtqYAe&t=124', '', ''),
+    ('anchor', 'https://youtu.be/PWSJOsK4FR4?si=HXeneQw1GG3F2OK9&t=70', '', ''),
+    ('delay', 'https://youtu.be/aU_hXh7PZnI?si=I5I3kSPvTlSDkGIw&t=73', '', ''),
+    ('triplet', 'https://youtu.be/ucUdisCKDto?si=Boz74pIE9cySqGdc&t=95', '', '');
