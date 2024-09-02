@@ -1,4 +1,13 @@
-const { queryInsertSong, queryInsertCharts, queryUpdateInternalLevel } = require('./queries');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { queryInsertSong, queryInsertCharts, queryUpdateInternalLevel, queryGetPatterns, queryGetCharts, queryInsertChartPattern } = require('./queries');
+const creds = require('./service-account.json')
+const { JWT } = require('google-auth-library')
+
+const SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.file',
+];
+
 const versionMapping = new Map(
     [
         [0, null],
@@ -36,6 +45,7 @@ const diffMapping = new Map(
     ]
 )
 
+/* eslint-disable no-irregular-whitespace */
 const titleHotfix = new Map(
     [
         ['Excalibur ～Revived Resolution～', `Excalibur ～Revived resolution～`],
@@ -70,10 +80,12 @@ const titleHotfix = new Map(
     ]
 )
 
-module.exports.GenerateID = function(song) {
+/* eslint-enable */
+
+module.exports.GenerateID = function (song) {
     var title = song.title_kana;
     if (song.catcode === '宴会場') {
-        if(song.comment === 'バンドメンバーを集めて挑め！（ヒーロー級）') {
+        if (song.comment === 'バンドメンバーを集めて挑め！（ヒーロー級）') {
             title = '[UTAGE] セイシユンコンフレツクス (ヒーロー)';
         } else if (song.comment === 'バンドメンバーを集めて楽しもう！（入門編）') {
             title = '[UTAGE] セイシユンコンフレツクス (入門編)';
@@ -95,7 +107,7 @@ module.exports.InsertSong = async function (client, song, ID) {
     await client.query(
         queryInsertSong, [ID, song.title.trim(), song.catcode, song.artist, `https://maimaidx.jp/maimai-mobile/img/Music/${song.image_url}`, version]
     ).then((res) => {
-        if(res.rowCount > 0) {
+        if (res.rowCount > 0) {
             console.log(`${song.title.trim()} / ${ID} added to song table`);
         } else {
             console.log(`${ID} already exists on song table`);
@@ -157,7 +169,7 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
             let chartType = sheet.getCell(i, dataIndexes[1] + offset).value;
             let chartDiff = diffMapping.get(sheet.getCell(i, dataIndexes[2] + offset).value);
             let chartInternal = sheet.getCell(i, dataIndexes[3] + offset).value;
-            if(chartInternal === "-") {
+            if (chartInternal === "-") {
                 // Assume that old value is to the left of "new" value
                 // Can be improved by adding a fallback index on dataIndexes
                 console.log(`${title} new internal level is NaN, using old internal level`);
@@ -166,13 +178,13 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
             if (isNaN(chartInternal) || chartInternal === null || chartDiff === null || chartType === null || title === null) continue;
             // console.log(`${title} | ${chartType} | ${chartDiff} | ${chartInternal}`);
 
-            if(titleHotfix.has(title)) {
+            if (titleHotfix.has(title)) {
                 title = titleHotfix.get(title)
             }
 
             await client.query(queryUpdateInternalLevel, [chartInternal, title, chartType, chartDiff])
                 .then((res) => {
-                    if(res.rowCount <= 0) {
+                    if (res.rowCount <= 0) {
                         console.log(`<${title}> ${chartType} ${chartDiff} is not updated (not present in DB), check the title`)
                     } else {
                         console.log(`${title} ${chartType} ${chartDiff} updated to ${chartInternal}`);
@@ -183,5 +195,140 @@ module.exports.UpdateInternalLevel = async function (client, spreadsheet, sheetn
                     process.exit();
                 })
         }
+    }
+}
+module.exports.UpdateFestivalPlusInternalDifficulty = async function (client) {
+    const spreadsheet = new GoogleSpreadsheet('1xqXfzfDfxiEE9mREwgX_ITIY8AowRM7w-TH2t1I_RJE', { apiKey: process.env.GOOGLE_KEY });
+    await spreadsheet.loadInfo();
+    // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
+    await module.exports.UpdateInternalLevel(client, spreadsheet, 'FESTiVAL+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 14, 21]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 7, 14, 21]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35, 42, 49]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '12+', [0, 1, 2, 4], [0, 7, 13, 19, 25, 31]);
+}
+
+module.exports.UpdateBuddiesInternalDifficulty = async function (client) {
+    const spreadsheet = new GoogleSpreadsheet('1vSqx2ghJKjWwCLrDEyZTUMSy5wkq_gY4i0GrJgSreQc', { apiKey: process.env.GOOGLE_KEY });
+    await spreadsheet.loadInfo();
+    // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
+    await module.exports.UpdateInternalLevel(client, spreadsheet, 'BUDDiES新曲', [0, 1, 2, 4], [0, 6, 12, 18, 24]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 7, 14, 21]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 7, 14, 21, 28, 35, 42]);
+}
+
+module.exports.UpdateBuddiesPlusInternalDifficulty = async function (client) {
+    const spreadsheet = new GoogleSpreadsheet('1d1AjO92Hj-iay10MsqdR_5TswEaikzC988aEOtFyybo', { apiKey: process.env.GOOGLE_KEY });
+    await spreadsheet.loadInfo();
+    // dataIndexes is [title, chart type (STD/DX), difficulty type (ADV/EXP/...), internal value]
+    await module.exports.UpdateInternalLevel(client, spreadsheet, 'BUDDiES+新曲', [0, 1, 2, 4], [0, 6, 12, 18]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '14以上', [0, 2, 3, 5], [0, 7, 15, 22, 29, 37]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13+', [0, 2, 3, 5], [0, 8, 15, 22, 29]);
+    await module.exports.UpdateInternalLevel(client, spreadsheet, '13', [0, 2, 3, 5], [0, 8, 18, 25, 32, 39, 47]);
+}
+
+module.exports.PopulateBaseSpreadsheet = async function (client) {
+    try {
+        const spreadsheet = new GoogleSpreadsheet(process.env.PATTERN_SHEET_ID, new JWT({
+            email: creds.client_email,
+            key: creds.private_key,
+            scopes: SCOPES,
+        }))
+    
+        await spreadsheet.loadInfo()
+
+        console.log("Load spreadsheet done")
+        
+        const sheet = spreadsheet.sheetsByIndex[0]
+        await sheet.loadCells()
+        console.log("Load sheet done")
+    
+        sheet.getCellByA1("A2").value = "ChartID"
+        sheet.getCellByA1("B2").value = "Song title"
+        sheet.getCellByA1("C2").value = "Difficulty"
+        sheet.getCellByA1("D1").value = "PatternID"
+        sheet.getCellByA1("D2").value = "Level"
+    
+        const patternsRes = await client.query(queryGetPatterns)
+        for(let i = 0; i < patternsRes.rows.length; i += 1) {
+            sheet.getCell(0, 4 + i).value = patternsRes.rows[i].id
+            sheet.getCell(1, 4 + i).value = patternsRes.rows[i].name
+        }
+    
+        const songsRes = await client.query(queryGetCharts)
+        sheet.setDataValidation({sheetId: 0, startRowIndex: 2, startColumnIndex: 4, endColumnIndex: 4 + patternsRes.rows.length, endRowIndex: 1 + songsRes.rows.length}, {condition: {type: 'BOOLEAN'}})
+        await sheet.saveUpdatedCells()
+
+        let lastSave = Date.now()
+
+        for(let i = 0; i < songsRes.rows.length; i += 1) {
+            let chart = songsRes.rows[i]
+            sheet.getCell(2 + i, 0).value = chart.id
+            sheet.getCell(2 + i, 1).value = chart.title
+            sheet.getCell(2 + i, 2).value = chart.difficulty
+            sheet.getCell(2 + i, 3).value = chart.level
+            for(let j = 0; j < patternsRes.rows.length; j += 1) {
+                sheet.getCell(2 + i, 4 + j).boolValue = false
+            }
+
+            if(Date.now() - lastSave >= 60000) {
+                await sheet.saveUpdatedCells()
+                lastSave = Date.now()
+            }
+        }
+    
+        await sheet.saveUpdatedCells()
+    } catch (error) {
+        console.log(error)
+        console.error(error)
+    }
+}
+
+module.exports.PushPatternToDB = async function (client) {
+    try {
+        const spreadsheet = new GoogleSpreadsheet(process.env.PATTERN_SHEET_ID, new JWT({
+            email: creds.client_email,
+            key: creds.private_key,
+            scopes: SCOPES,
+        }))
+    
+        await spreadsheet.loadInfo()
+
+        console.log("Load spreadsheet done")
+        
+        const sheet = spreadsheet.sheetsByIndex[0]
+        await sheet.loadCells()
+        console.log("Load sheet done")
+
+        const patternsRes = await client.query(queryGetPatterns)
+
+        let values = []
+
+        for(let currentRow = 2; currentRow < 2000; currentRow += 1) { // change 2000 with other value
+            const chartID = sheet.getCell(currentRow, 0).numberValue
+            if(chartID === null || isNaN(chartID) || chartID <= 0) {
+                break
+            }
+            for(let currentCol = 4; currentCol < patternsRes.rows.length; currentCol += 1) {
+                if (sheet.getCell(currentRow, currentCol).boolValue) {
+                    const patternID = sheet.getCell(0, currentCol).numberValue
+                    if(patternID === null || isNaN(patternID) || patternID <= 0) {
+                        continue
+                    }
+                    values.push([chartID, patternID])
+                }
+            }
+        }
+        values = values.flat()
+        let brackets = []
+        for (let i = 1; i < values.length; i += 2) {
+            brackets.push(`($${i}, $${i + 1})`);
+        }
+
+        await client.query(queryInsertChartPattern(brackets), values)
+    } catch (error) {
+        console.log(error)
+        console.error(error)
     }
 }

@@ -33,6 +33,9 @@
                 <v-combobox label="Title (romaji) search" v-model="titleRomajiFilter" :items="romajis"/>
                 <v-combobox label="Artist search" v-model="artistFilter" :items="artists"/>
                 <v-row>
+                    <v-col cols="12">
+                        <v-select label="Pattern filter" v-model="patternsFilter" :items="patterns" chips multiple clearable hide-details />
+                    </v-col>
                     <v-col cols="6">
                         <v-select label="Min level" v-model="minInternalFilter" :items="internalDifficultiesFilter" hide-details></v-select>
                     </v-col>
@@ -131,6 +134,7 @@ export default {
             versions: [],
             titles: [],
             romajis: [],
+            patterns: [],
 
             // Datas used for modal
             modalData: {},
@@ -151,6 +155,7 @@ export default {
             maxInternalFilter: "15",
             difficultiesFilter: [],
             internalDifficultiesFilter: [],
+            patternsFilter: [],
 
             // Toggles
             toggleFavorite: false,
@@ -215,9 +220,16 @@ export default {
                 return !this.artistFilter || chart.artist.toLowerCase().includes(this.artistFilter.toLowerCase())
             })
 
+            // Pattern filter
+            finalCharts = finalCharts.filter((chart) => {
+                return this.patternsFilter.length <= 0 || this.patternsFilter.some((pattern) => {
+                    return chart.patterns.includes(pattern)
+                })
+            })
+
             // Type filter (STD, DX)
             finalCharts = finalCharts.filter((chart) => {
-                return this.typesFilter <= 0 || this.typesFilter.includes(chart.type)
+                return this.typesFilter.length <= 0 || this.typesFilter.includes(chart.type)
             })
 
             // Version filter
@@ -274,6 +286,7 @@ export default {
             let romajiSet = new Set()
             let artistSet = new Set()
             let internalDifficultySet = new Set()
+            let patternSet = new Set()
             let fetchedCharts = []
             for (let i = 0; i < data.length; i += 1) {
                 let song = data[i]
@@ -284,6 +297,9 @@ export default {
                 artistSet.add(song.artist)
                 for (let j = 0; j < song.diff.length; j += 1) {
                     let chart = song.diff[j]
+                    for(let k = 0; k < chart.patterns.length; k += 1) {
+                        patternSet.add(chart.patterns[k])
+                    }
                     internalDifficultySet.add(parseFloat(chart.internal_level).toFixed(1))
                     fetchedCharts.push({
                         artist: song.artist,
@@ -297,6 +313,7 @@ export default {
                         level: chart.level,
                         internal_level: chart.internal_level,
                         type: chart.type,
+                        patterns: chart.patterns,
                     })
                 }
             }
@@ -306,6 +323,7 @@ export default {
             this.romajis = [...romajiSet]
             this.titles = [...titleSet]
             this.versions = [...versionSet]
+            this.patterns = [...patternSet]
             this.internalDifficultiesFilter = [...internalDifficultySet]
             this.internalDifficultiesFilter.sort((a, b) => {return a-b})
             this.charts.reverse()
