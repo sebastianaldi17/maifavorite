@@ -9,7 +9,6 @@ import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 
 import { createRouter, createWebHistory } from 'vue-router'
-import Patterns from './pages/Patterns.vue'
 import ChartGallery from './pages/ChartGallery.vue'
 import About from './pages/About.vue'
 
@@ -25,7 +24,6 @@ const vuetify = createVuetify({
 })
 
 const routes = [
-    { path: '/patterns', component: Patterns, name: 'patterns' },
     { path: '/about', component: About, name: 'about' },
     { path: '/', component: ChartGallery, name: 'index' },
     { path: '/:pathMatch(.*)*', redirect: '/' },
